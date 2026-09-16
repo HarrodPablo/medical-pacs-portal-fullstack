@@ -21,7 +21,6 @@ El proyecto está dividido en dos partes principales y utiliza las siguientes te
 - **Orthanc (PACS)** como servidor especializado en almacenamiento y distribución de estudios DICOM.
 - **JWT (JSON Web Tokens)** y **Bcrypt** para un sistema de autenticación robusto y seguro.
 - **Proxy Inverso Seguro** para servir imágenes de Orthanc mediante tokens dinámicos temporales.
-- **WhatsApp Bot** integrado (máquina de estados) para ruteo de conversaciones y envío de reportes médicos.
 
 ---
 
@@ -29,7 +28,7 @@ El proyecto está dividido en dos partes principales y utiliza las siguientes te
 
 ```text
 Radiografia/
-├── backend/          # API RESTful, proxy de Orthanc, Prisma y lógica de WhatsApp
+├── backend/          # API RESTful, proxy de Orthanc y lógica de negocio
 ├── frontend/         # Aplicación React, dashboard y visor web de radiografías
 └── README.md         # Documentación principal del proyecto
 ```
