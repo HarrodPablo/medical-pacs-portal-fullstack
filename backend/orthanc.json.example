@@ -1,0 +1,28 @@
+{
+  "Name": "PACS Server",
+  "DicomAet": "ORTHANCPACS",
+  "StorageDirectory": "/var/lib/orthanc/db",
+  "IndexDirectory": "/var/lib/orthanc/db",
+  "AuthenticationEnabled": true,
+  "RegisteredUsers": {
+    "your_orthanc_username": "YOUR_ORTHANC_PASSWORD"
+  },
+  "DicomPort": 4242,
+  "HttpPort": 8042,
+  "RemoteAccessAllowed": true,
+  "Plugins": [
+    "/usr/local/share/orthanc/plugins"
+  ],
+  "HttpCompressionEnabled": true,
+  "HttpServerThreadsCount": 8,
+  "DicomWeb": {
+    "Enable": true,
+    "Root": "/dicom-web/",
+    "EnableWado": true,
+    "WadoRoot": "/wado",
+    "PublicRoot": "/api/orthanc/pacs/dicom-web/"
+  },
+  "StoneWebViewer": {
+    "Enable": true
+  }
+}

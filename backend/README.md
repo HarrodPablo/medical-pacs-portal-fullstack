@@ -1,175 +1,104 @@
-# 🏥 Portal Médico - Backend
+# 🏥 Medical Imaging PACS Portal - Backend API
 
-## 🎯 **Sistema Completo Funcionando**
+Robust RESTful API and DICOM PACS proxy gateway designed for high-performance medical imaging management, secure patient access, and clinical reporting.
 
-Backend del Portal Médico conectado a **Neon PostgreSQL** con todas las funcionalidades operativas.
+---
 
-## 🚀 **Funcionalidades Principales**
+## 🎯 Architecture & Technologies
 
-### 🔐 **Autenticación**
-- ✅ Login con DNI y contraseña
-- ✅ Tokens JWT para sesiones
-- ✅ Roles: ADMIN, DOCTOR, PATIENT
-- ✅ Contraseñas hasheadas con bcrypt
+- **Runtime**: Node.js (ES Modules)
+- **Framework**: Express.js
+- **Database**: PostgreSQL (hosted on [Neon](https://neon.tech))
+- **ORM**: Prisma Client & Migrations
+- **PACS Server**: [Orthanc](https://www.orthanc-server.com/) (DICOM Store, Query/Retrieve, Stone Web Viewer)
+- **Authentication**: JWT (JSON Web Tokens) with bcrypt password hashing
+- **Proxy Gateway**: Dynamic tokenized reverse proxy isolating Orthanc PACS from direct public exposure
+- **Mailing**: Resend API for transactional communications
 
-### 👥 **Gestión de Usuarios**
-- ✅ Crear usuarios (Admin)
-- ✅ Listar usuarios con paginación
-- ✅ Buscar por DNI o nombre
-- ✅ Filtrar por rol
+---
 
-### 📊 **Estudios Médicos**
-- ✅ Subir radiografías (base64)
-- ✅ Asociar pacientes y doctores
-- ✅ Guardar notas y tipo de estudio
-- ✅ Filtrar por fecha, paciente, tipo
+## 🚀 Key Responsibilities
 
-### 📄 **Informes Médicos**
-- ✅ Crear informes para estudios
-- ✅ Contenido médico completo
-- ✅ Descargar PDFs
-- ✅ Permisos por rol
+1. **Role-Based Access Control (RBAC)**: Enforces permission boundaries across `ADMIN`, `DOCTOR`, and `PATIENT` roles.
+2. **DICOM PACS Secure Gateway**: Intercepts requests to the PACS server, validating temporary access tokens so patients only view their authorized studies.
+3. **Clinical Studies & Reporting**: Manages medical study metadata, radiologist findings, diagnosis notes, and downloadable medical report PDFs.
+4. **DICOM Web & Stone Viewer Integration**: Streams medical instances directly to web clients with zero latency and high compression.
 
-## 🛠️ **Configuración**
+---
 
-### **Variables de Entorno (.env)**
-```env
-DATABASE_URL="postgresql://username:password@host:port/database?sslmode=require"
-JWT_SECRET="portal-medico-secreto-2024"
-PORT=3000
+## ⚙️ Configuration & Environment
+
+Copy the example environment file and configure your credentials:
+
+```bash
+cp .env.example .env
 ```
 
-### **Instalación**
+### Environment Variables Reference
+
+| Variable | Description |
+| :--- | :--- |
+| `DATABASE_URL` | Neon PostgreSQL pooled connection string |
+| `PORT` | API server port (default: `3000`) |
+| `JWT_SECRET` | Secret key for signing authentication tokens |
+| `ORTHANC_URL` | Internal HTTP address of the Orthanc PACS server |
+| `ORTHANC_USER` | HTTP Basic Auth username for Orthanc |
+| `ORTHANC_PASS` | HTTP Basic Auth password for Orthanc |
+| `RESEND_API_KEY` | Transactional email provider API key |
+| `RESEND_FROM_EMAIL` | Verified sender email address |
+| `FRONTEND_URL` | Authorized client origin for CORS policies |
+| `NODE_ENV` | Application environment (`development` \| `production`) |
+
+---
+
+## 🛠️ Installation & Execution
+
 ```bash
+# 1. Install dependencies
 npm install
+
+# 2. Generate Prisma Client
+npx prisma generate
+
+# 3. Start development server
+npm run dev
+
+# 4. Start production server
+npm start
 ```
 
-### **Iniciar Servidor**
-```bash
-node src/index.js
-```
+---
 
-## 📁 **Estructura del Proyecto**
+## 📡 Core API Endpoints
 
-```
-backend/
-├── src/
-│   ├── index.js              # Servidor principal
-│   ├── lib/
-│   │   └── prisma.js       # Configuración de Prisma
-│   ├── middleware/
-│   │   └── auth.js        # Middleware de autenticación
-│   ├── routes/
-│   │   ├── auth.js         # Rutas de autenticación
-│   │   ├── users.js        # Rutas de usuarios
-│   │   ├── studies.js      # Rutas de estudios
-│   │   └── reports.js     # Rutas de informes
-│   ├── scripts/
-│   │   └── seed.js        # Datos iniciales
-│   └── services/
-│       └── whatsapp.js     # Notificaciones WhatsApp
-├── prisma/
-│   └── schema.prisma       # Esquema de base de datos
-├── package.json
-└── README.md
-```
+### Authentication
+- `POST /api/auth/login` - Authenticate user credentials and issue signed JWT.
+- `GET /api/auth/me` - Retrieve current session details and assigned role.
 
-## 🎯 **Endpoints API**
+### Users & Patients (Admin / Staff)
+- `GET /api/users` - Paginated user directory with role and search filters.
+- `POST /api/users` - Register a new patient or clinical staff member.
+- `GET /api/users/:id` - Fetch user profile by ID.
+- `PUT /api/users/:id` - Update user information.
+- `DELETE /api/users/:id` - Remove user account.
 
-### **Autenticación**
-```
-POST /api/auth/login
-```
+### Medical Studies & DICOM
+- `GET /api/studies` - List available studies filtered by patient, doctor, date range, or study type.
+- `POST /api/studies` - Register new study metadata.
+- `GET /api/studies/:id` - Retrieve detailed study metadata and associated DICOM instances.
 
-### **Usuarios**
-```
-GET    /api/users          # Listar usuarios
-POST   /api/users          # Crear usuario
-GET    /api/users/:id      # Obtener usuario
-PUT    /api/users/:id      # Actualizar usuario
-DELETE /api/users/:id      # Eliminar usuario
-```
+### Clinical Reports
+- `GET /api/reports` - List diagnostic reports.
+- `POST /api/reports` - Create diagnostic report for a specific study.
+- `GET /api/reports/:id` - Retrieve report and download signed PDF.
 
-### **Estudios**
-```
-GET    /api/studies        # Listar estudios
-POST   /api/studies        # Crear estudio
-GET    /api/studies/:id    # Obtener estudio
-```
+### Orthanc PACS Proxy
+- `/api/orthanc/pacs/*` - Reverse proxy with tokenized authorization for Stone Web Viewer and WADO-RS endpoints.
 
-### **Informes**
-```
-GET    /api/reports        # Listar informes
-POST   /api/reports        # Crear informe
-GET    /api/reports/:id    # Obtener informe
-```
+---
 
-## 👤 **Usuarios Iniciales**
+## 🔒 Security Measures
 
-### **Administrador**
-- **DNI**: 12345678
-- **Password**: 12345678
-- **Rol**: ADMIN
-- **Permisos**: Acceso completo
-
-### **Doctor**
-- **DNI**: 87654321
-- **Password**: 87654321
-- **Rol**: DOCTOR
-- **Permisos**: Estudios e informes propios
-
-### **Paciente**
-- **DNI**: 11223344
-- **Password**: 11223344
-- **Rol**: PATIENT
-- **Permisos**: Solo sus datos
-
-## 🗄️ **Base de Datos**
-
-### **Modelos**
-- **User**: Usuarios del sistema
-- **Study**: Estudios médicos
-- **Report**: Informes médicos
-
-### **Relaciones**
-- User → Study (patient/doctor)
-- Study → Report (study/doctor)
-
-## 🔧 **Configuración de Neon**
-
-1. **Crear cuenta** en [neon.tech](https://neon.tech)
-2. **Crear proyecto** PostgreSQL
-3. **Copiar Connection String**
-4. **Configurar .env** con la URL
-5. **Ejecutar seed**: `node src/scripts/seed.js`
-
-## 🚀 **Características Técnicas**
-
-- **Node.js** con ES Modules
-- **Express.js** para API REST
-- **Prisma ORM** para base de datos
-- **Neon PostgreSQL** como base de datos
-- **JWT** para autenticación
-- **Bcrypt** para contraseñas
-- **CORS** para frontend
-- **Payload limit** de 50MB para imágenes
-
-## 📱 **Frontend Integration**
-
-El frontend debe configurar:
-- **URL base**: http://localhost:3000
-- **Headers**: Authorization: Bearer {token}
-- **Content-Type**: application/json
-
-## 🎯 **Estado Actual**
-
-✅ **100% Funcional**
-- Autenticación completa
-- Gestión de usuarios
-- Subida de radiografías
-- Creación de informes
-- Base de datos persistente
-- Permisos por rol
-- Descarga de PDFs
-
-**¡Portal Médico listo para producción!** 🏥
+- **No Hardcoded Secrets**: All credentials, tokens, and endpoints are injected via environment variables.
+- **Data Isolation**: Patients can never query or access studies outside their own clinical records.
+- **CORS Protection**: Access strictly constrained to authorized client origins.

@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+*.env.local
+
+# Internal Tools, Maintenance & Scratch Scripts
+backend/.tools/
+tools/
+scratch/
+backups/
+*.dcm
+
+# Local Databases
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Builds & Uploads
+dist/
+dist-ssr/
+build/
+backend/uploads/
+uploads/
+
+# IDE, OS & Assistant Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.claude/
+CLAUDE.md
